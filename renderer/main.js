@@ -1,7 +1,10 @@
+// Import vendor CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import 'tom-select/dist/css/tom-select.css';
+import './styles.css';
 
+// Import vendor JS
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Swal from 'sweetalert2';
 import TomSelect from 'tom-select';

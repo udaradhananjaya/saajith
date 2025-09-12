@@ -2,6 +2,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const db = require('./models/db'); // our DB helper
+const isDev = process.env.NODE_ENV === 'development';
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -14,8 +15,29 @@ function createWindow() {
     }
   });
 
-  win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
-  // win.webContents.openDevTools(); // uncomment for dev
+
+  let loadTarget;
+  if (isDev) {
+    loadTarget = 'http://localhost:5173';
+  } else {
+    loadTarget = path.join(__dirname, 'dist', 'index.html');
+  }
+
+
+  console.log(`[Electron] NODE_ENV=${process.env.NODE_ENV}`);
+  console.log(`[Electron] App mode: ${isDev ? 'DEV' : 'PROD'}`);
+  console.log(`[Electron] Loading: ${loadTarget}`);
+
+  if (isDev) {
+    win.loadURL(loadTarget).catch(err => {
+      console.error('[Electron] Failed to load dev server:', err);
+    });
+    win.webContents.openDevTools();
+  } else {
+    win.loadFile(loadTarget).catch(err => {
+      console.error('[Electron] Failed to load file:', err);
+    });
+  }
 }
 
 app.whenReady().then(createWindow);
