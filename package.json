@@ -20,7 +20,10 @@
   "homepage": "https://github.com/udaradhananjaya/saajith#readme",
   "dependencies": {
     "better-sqlite3": "^12.2.0",
-    "electron": "^38.1.0"
+    "bootstrap": "^5.3.8",
+    "electron": "^38.1.0",
+    "sweetalert2": "^11.23.0",
+    "tom-select": "^2.4.3"
   },
   "devDependencies": {
     "electron-rebuild": "^3.2.9"

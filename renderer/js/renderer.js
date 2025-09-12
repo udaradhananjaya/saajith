@@ -1,4 +1,11 @@
-// renderer/js/renderer.js
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import 'tom-select/dist/css/tom-select.css';
+
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import Swal from 'sweetalert2';
+import TomSelect from 'tom-select';
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('entryForm');
   const title = document.getElementById('title');
