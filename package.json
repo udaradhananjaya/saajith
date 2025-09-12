@@ -1,0 +1,28 @@
+{
+  "name": "saajith",
+  "version": "1.0.0",
+  "description": "\"# saajith\"",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/udaradhananjaya/saajith.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/udaradhananjaya/saajith/issues"
+  },
+  "homepage": "https://github.com/udaradhananjaya/saajith#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "electron": "^38.1.0"
+  },
+  "devDependencies": {
+    "electron-rebuild": "^3.2.9"
+  }
+}
