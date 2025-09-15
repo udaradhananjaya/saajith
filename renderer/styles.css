@@ -35,8 +35,6 @@ body {
 .swal2-confirm,
 .swal2-cancel,
 .swal2-deny {
-  background: #2c2f36 !important;
-  color: #e0e0e0 !important;
   border: none !important;
 }
 

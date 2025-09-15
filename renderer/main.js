@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
       item.querySelector('.toggle-paid').addEventListener('click', async () => {
         await window.api.togglePaid(e.id, e.paid ? 0 : 1);
         const action = e.paid ? 'Marked unpaid' : 'Marked paid';
-        Swal.fire({ toast: true, position: 'top-end', timer: 1500, title: action, icon: 'success' });
+        Swal.fire({ toast: true, position: 'bottom-end', timer: 1500, title: action, icon: 'success' });
         loadEntries();
       });
 
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (result.isConfirmed) {
           await window.api.deleteEntry(e.id);
-          Swal.fire({ toast: true, position: 'top-end', timer: 1400, title: 'Deleted', icon: 'success' });
+          Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Deleted', icon: 'success' });
           loadEntries();
         }
       });
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await window.api.addEntry(entry);
     form.reset();
     loadEntries();
-    Swal.fire({ toast: true, position: 'top-end', timer: 1400, title: 'Added', icon: 'success' });
+    Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Added', icon: 'success' });
   });
 
   function escapeHtml(s) {
