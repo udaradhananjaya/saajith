@@ -1,0 +1,12 @@
+body {
+  background: #181a20;
+  color: #e0e0e0;
+}
+
+.list-group-item {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #23262f;
+  color: #e0e0e0;
+  border: 1px solid #2c2f36;
+}
