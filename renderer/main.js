@@ -33,8 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
       item.className = 'list-group-item d-flex justify-content-between align-items-center';
       item.innerHTML = `
         <div>
-          <div><strong>${escapeHtml(e.title)}</strong> <small class="text-muted">(${e.category || ''})</small></div>
-          <div class="text-muted">Rs ${e.amount} — ${new Date(e.created_at).toLocaleString()}</div>
+          <div>
+            <strong>${escapeHtml(e.title)}</strong>
+            ${e.category
+              ? e.category.split(',').map(cat =>
+                  `<span class="badge bg-secondary ms-1">${escapeHtml(cat.trim())}</span>`
+                ).join('')
+              : ''
+            }
+          </div>
+          <div class="text-muted">Rs. ${e.amount} — ${new Date(e.created_at).toLocaleString()}</div>
         </div>
         <div>
           <button class="btn btn-sm ${e.paid ? 'btn-success' : 'btn-outline-success'} me-2 toggle-paid">${e.paid ? 'Paid' : 'Mark Paid'}</button>
@@ -71,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const entry = { title: title.value.trim(), amount: parseFloat(amount.value) || 0, category: category.value };
+    const entry = { title: title.value.trim(), amount: parseFloat(amount.value) || 0, category: Array.from(category.selectedOptions).map(opt => opt.value).join(', ') };
     if (!entry.title) {
       Swal.fire({ icon: 'error', title: 'Title required' });
       return;
@@ -87,4 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadEntries();
+});
+
+
+// Navigate to queries.html on F2 key press
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'F2') {
+    window.api.goToQueries();
+  }
 });

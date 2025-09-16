@@ -46,3 +46,26 @@ body {
 .swal2-footer {
   color: #b0b0b0 !important;
 }
+
+.text-muted {
+  color: #797979 !important;
+}
+
+.ts-dropdown .active,
+.ts-dropdown .option.active,
+.ts-dropdown .option.selected,
+.ts-dropdown .option:hover {
+  background-color: #3399ff !important;
+  color: #fff !important;
+}
+
+.ts-control .item {
+  background-color: #b6b6b6 !important; /* normal background */
+  color: #e0e0e0 !important;
+}
+
+.ts-control .item.active,
+.ts-control .item.focus {
+  background-color: #6ec1ff !important; /* light blue when active/focused */
+  color: #fff !important;
+}

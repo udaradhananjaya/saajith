@@ -3,11 +3,13 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const db = require('./models/db'); // our DB helper
 const isDev = process.env.NODE_ENV === 'development';
+let win;
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 1000,
+  win = new BrowserWindow({
+    width: 1100,
     height: 700,
+    autoHideMenuBar: true, // Hides the menu bar
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -22,6 +24,7 @@ function createWindow() {
   } else {
     loadTarget = path.join(__dirname, 'dist', 'index.html');
   }
+  win.setMenuBarVisibility(false); // Ensures menu bar is hidden
 
 
   console.log(`[Electron] NODE_ENV=${process.env.NODE_ENV}`);
@@ -65,4 +68,22 @@ ipcMain.handle('db:togglePaid', (event, id, paid) => {
 
 ipcMain.handle('db:deleteEntry', (event, id) => {
   return db.deleteEntry(id);
+});
+
+ipcMain.handle('db:editEntry', (event, id, data) => {
+  // You need to implement this in your db.js as well!
+  return db.editEntry(id, data);
+});
+
+/* Navigation */
+ipcMain.on('go-to-index', () => {
+  if (win) {
+    win.loadURL('http://localhost:5173');
+  }
+});
+
+ipcMain.on('go-to-queries', () => {
+  if (win) {
+    win.loadURL('http://localhost:5173/queries.html');
+  }
 });

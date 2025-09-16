@@ -40,4 +40,10 @@ function deleteEntry(id) {
   return { changes: info.changes };
 }
 
-module.exports = { getEntries, addEntry, togglePaid, deleteEntry };
+function editEntry(id, data) {
+  const stmt = db.prepare('UPDATE entries SET title = ?, amount = ? WHERE id = ?');
+  const info = stmt.run(data.title, data.amount, id);
+  return { changes: info.changes };
+}
+
+module.exports = { getEntries, addEntry, togglePaid, deleteEntry, editEntry };
