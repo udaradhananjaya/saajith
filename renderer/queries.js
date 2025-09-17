@@ -87,7 +87,12 @@ function renderEntries(entries) {
                 `<span class="badge bg-secondary ms-1">${escapeHtml(cat)}</span>`
             ).join('')}
             </td>
-            <td>${new Date(e.created_at).toLocaleString()}</td>
+            <td>${new Date(e.created_at).toLocaleDateString('en-GB')}</td>
+            <td>${
+                e.completed_date
+                    ? new Date(e.completed_date).toLocaleDateString('en-GB')
+                    : ''
+            }</td>
             <td>
             <button class="btn btn-sm ${e.paid ? 'btn-success' : 'btn-outline-success'} mark-paid">${e.paid ? 'Paid' : 'Mark Paid'}</button>
             </td>
