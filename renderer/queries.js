@@ -82,7 +82,6 @@ function renderEntries(entries) {
         }
         tr.innerHTML = `
             <td>${escapeHtml(e.title)}</td>
-            <td>Rs. ${e.amount}</td>
             <td>
             ${categoriesToShow.map(cat =>
                 `<span class="badge bg-secondary ms-1">${escapeHtml(cat)}</span>`
@@ -161,7 +160,7 @@ bulkControlsDiv.style.display = 'none'; // hidden by default
 
 bulkControlsDiv.innerHTML = `
   <div class="col-auto">
-    <input type="number" min="1" id="bulkPaidCount" class="form-control" placeholder="Count" style="width: 100px;">
+    <input type="number" min="0" step="5" id="bulkPaidCount" class="form-control" placeholder="Count" style="width: 100px;" value="0">
   </div>
   <div class="col-auto">
     <button id="bulkMarkPaidBtn" class="btn btn-success">Mark as Paid</button>
