@@ -30,9 +30,16 @@ app.whenReady().then(() => {
       amount REAL DEFAULT 0,
       category TEXT,
       paid INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      completed_date TEXT
     );
   `);
+
+  // If upgrading an existing DB, add the column if missing
+  const pragma = db.prepare("PRAGMA table_info(entries)").all();
+  if (!pragma.some(col => col.name === "completed_date")) {
+    db.exec(`ALTER TABLE entries ADD COLUMN completed_date TEXT`);
+  }
 });
 
 // Example helpers
@@ -47,8 +54,16 @@ function addEntry(entry) {
 }
 
 function togglePaid(id, paid) {
-  const stmt = db.prepare("UPDATE entries SET paid = ? WHERE id = ?");
-  const info = stmt.run(paid ? 1 : 0, id);
+  let info;
+  if (paid) {
+    // Mark as paid: set paid=1 and set completed_date to current timestamp
+    const stmt = db.prepare("UPDATE entries SET paid = 1, completed_date = datetime('now') WHERE id = ?");
+    info = stmt.run(id);
+  } else {
+    // Mark as unpaid: set paid=0 and clear completed_date
+    const stmt = db.prepare("UPDATE entries SET paid = 0, completed_date = NULL WHERE id = ?");
+    info = stmt.run(id);
+  }
   return { changes: info.changes };
 }
 
