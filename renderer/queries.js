@@ -23,6 +23,8 @@ const titleSearch = document.getElementById('titleSearch');
 const dateFrom = document.getElementById('dateFrom');
 const dateTo = document.getElementById('dateTo');
 
+let allEntries = [];
+
 async function fetchEntries() {
     // Replace with your actual API call
     return await window.api.getEntries();
@@ -31,18 +33,18 @@ async function fetchEntries() {
 function filterEntries(entries) {
     let filtered = entries;
     if (category.value) {
-    filtered = filtered.filter(e => (e.category || '').split(',').map(c => c.trim()).includes(category.value));
+        filtered = filtered.filter(e => (e.category || '').split(',').map(c => c.trim()).includes(category.value));
     }
     if (titleSearch.value.trim()) {
-    filtered = filtered.filter(e => (e.title || '').toLowerCase().includes(titleSearch.value.trim().toLowerCase()));
+        filtered = filtered.filter(e => (e.title || '').toLowerCase().includes(titleSearch.value.trim().toLowerCase()));
     }
     if (dateFrom.value) {
-    filtered = filtered.filter(e => new Date(e.created_at) >= new Date(dateFrom.value));
+        filtered = filtered.filter(e => new Date(e.created_at) >= new Date(dateFrom.value));
     }
     if (dateTo.value) {
-    const toDate = new Date(dateTo.value);
-    toDate.setHours(23,59,59,999);
-    filtered = filtered.filter(e => new Date(e.created_at) <= toDate);
+        const toDate = new Date(dateTo.value);
+        toDate.setHours(23,59,59,999);
+        filtered = filtered.filter(e => new Date(e.created_at) <= toDate);
     }
     return filtered;
 }
@@ -50,71 +52,71 @@ function filterEntries(entries) {
 function renderEntries(entries) {
     entriesTableBody.innerHTML = '';
     if (!entries.length) {
-    entriesTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No entries found</td></tr>`;
-    return;
+        entriesTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No entries found</td></tr>`;
+        return;
     }
     entries.forEach(e => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td>${escapeHtml(e.title)}</td>
-        <td>Rs. ${e.amount}</td>
-        <td>
-        ${(e.category || '').split(',').map(cat =>
-            `<span class="badge bg-secondary ms-1">${escapeHtml(cat.trim())}</span>`
-        ).join('')}
-        </td>
-        <td>${new Date(e.created_at).toLocaleString()}</td>
-        <td>
-        <button class="btn btn-sm ${e.paid ? 'btn-success' : 'btn-outline-success'} mark-paid">${e.paid ? 'Paid' : 'Mark Paid'}</button>
-        </td>
-        <td>
-        <button class="btn btn-sm btn-warning edit-entry">Edit</button>
-        <button class="btn btn-sm btn-danger delete-entry">Delete</button>
-        </td>
-    `;
-    // Mark Paid/Unpaid
-    tr.querySelector('.mark-paid').addEventListener('click', async () => {
-        await window.api.togglePaid(e.id, e.paid ? 0 : 1);
-        loadAndRender();
-    });
-    // Edit
-    tr.querySelector('.edit-entry').addEventListener('click', async () => {
-        const { value: formValues } = await Swal.fire({
-        title: 'Edit Entry',
-        html:
-            `<input id="swal-title" class="swal2-input" placeholder="Title" value="${escapeHtml(e.title)}">` +
-            `<input id="swal-amount" type="number" step="0.01" class="swal2-input" placeholder="Amount" value="${e.amount}">`,
-        focusConfirm: false,
-        preConfirm: () => {
-            return [
-            document.getElementById('swal-title').value,
-            document.getElementById('swal-amount').value
-            ]
-        }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${escapeHtml(e.title)}</td>
+            <td>Rs. ${e.amount}</td>
+            <td>
+            ${(e.category || '').split(',').map(cat =>
+                `<span class="badge bg-secondary ms-1">${escapeHtml(cat.trim())}</span>`
+            ).join('')}
+            </td>
+            <td>${new Date(e.created_at).toLocaleString()}</td>
+            <td>
+            <button class="btn btn-sm ${e.paid ? 'btn-success' : 'btn-outline-success'} mark-paid">${e.paid ? 'Paid' : 'Mark Paid'}</button>
+            </td>
+            <td>
+            <button class="btn btn-sm btn-warning edit-entry">Edit</button>
+            <button class="btn btn-sm btn-danger delete-entry">Delete</button>
+            </td>
+        `;
+        // Mark Paid/Unpaid
+        tr.querySelector('.mark-paid').addEventListener('click', async () => {
+            await window.api.togglePaid(e.id, e.paid ? 0 : 1);
+            loadAndRender();
         });
-        if (formValues) {
-        await window.api.editEntry(e.id, {
-            title: formValues[0],
-            amount: parseFloat(formValues[1]) || 0
+        // Edit
+        tr.querySelector('.edit-entry').addEventListener('click', async () => {
+            const { value: formValues } = await Swal.fire({
+                title: 'Edit Entry',
+                html:
+                    `<input id="swal-title" class="swal2-input" placeholder="Title" value="${escapeHtml(e.title)}">` +
+                    `<input id="swal-amount" type="number" step="0.01" class="swal2-input" placeholder="Amount" value="${e.amount}">`,
+                focusConfirm: false,
+                preConfirm: () => {
+                    return [
+                        document.getElementById('swal-title').value,
+                        document.getElementById('swal-amount').value
+                    ]
+                }
+            });
+            if (formValues) {
+                await window.api.editEntry(e.id, {
+                    title: formValues[0],
+                    amount: parseFloat(formValues[1]) || 0
+                });
+                loadAndRender();
+            }
         });
-        loadAndRender();
-        }
-    });
-    // Delete
-    tr.querySelector('.delete-entry').addEventListener('click', async () => {
-        const result = await Swal.fire({
-        title: 'Delete entry?',
-        text: `Do you want to delete "${e.title}"?`,
-        icon: 'warning',
-        showCancelButton: true
+        // Delete
+        tr.querySelector('.delete-entry').addEventListener('click', async () => {
+            const result = await Swal.fire({
+                title: 'Delete entry?',
+                text: `Do you want to delete "${e.title}"?`,
+                icon: 'warning',
+                showCancelButton: true
+            });
+            if (result.isConfirmed) {
+                await window.api.deleteEntry(e.id);
+                loadAndRender();
+                Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Deleted', icon: 'success' });
+            }
         });
-        if (result.isConfirmed) {
-        await window.api.deleteEntry(e.id);
-        loadAndRender();
-        Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Deleted', icon: 'success' });
-        }
-    });
-    entriesTableBody.appendChild(tr);
+        entriesTableBody.appendChild(tr);
     });
 }
 
@@ -123,20 +125,25 @@ function escapeHtml(s) {
 }
 
 async function loadAndRender() {
-    let entries = await fetchEntries();
+    allEntries = await fetchEntries();
     // Sort by created_at descending
-    entries = entries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    renderEntries(filterEntries(entries));
+    allEntries = allEntries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    renderEntries(filterEntries(allEntries));
 }
 
-filterForm.addEventListener('submit', ev => {
-    ev.preventDefault();
-    loadAndRender();
-});
+// --- Dynamic Filtering ---
+function triggerFilter() {
+    renderEntries(filterEntries(allEntries));
+}
+
+// Listen for changes on all filter fields
+category.addEventListener('change', triggerFilter);
+titleSearch.addEventListener('input', triggerFilter);
+dateFrom.addEventListener('change', triggerFilter);
+dateTo.addEventListener('change', triggerFilter);
 
 // Initial load
 loadAndRender();
-
 
 // Navigation: Go to index.html on F1 key press
 window.addEventListener('keydown', (e) => {

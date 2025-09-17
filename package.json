@@ -41,6 +41,7 @@
   "build": {
     "appId": "com.ud.saajith",
     "productName": "Expenses Tracking App - Created by UD",
+    "icon": "build/icon.ico",
     "directories": {
       "buildResources": "assets",
       "output": "release"
@@ -61,6 +62,7 @@
       }
     ],
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis",
         "portable"
