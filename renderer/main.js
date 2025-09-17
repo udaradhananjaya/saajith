@@ -17,7 +17,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const entriesList = document.getElementById('entriesList');
 
   // Initialize TomSelect on the category dropdown
-  new TomSelect('#category', { create: false, sortField: { field: 'text', direction: 'asc' } });
+  const tomSelectCategory = new TomSelect('#category', { create: false, sortField: { field: 'text', direction: 'asc' } });
+
+  // Focus title field on page load
+  title.focus();
+
+  // Move focus to amount on Enter in title
+  title.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      amount.focus();
+    }
+  });
+
+  // Move focus to category on Enter in amount
+  amount.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // Focus TomSelect input
+      if (category.tomselect) {
+        category.tomselect.focus();
+      } else {
+        category.focus();
+      }
+    }
+  });
+
+  // On Enter in category, submit form and focus title
+  category.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      form.requestSubmit();
+      // Focus title after submit (with a slight delay to ensure form reset)
+      setTimeout(() => title.focus(), 10);
+    }
+  });
 
   async function loadEntries() {
     const entries = await window.api.getEntries();
