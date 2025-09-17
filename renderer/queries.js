@@ -220,7 +220,11 @@ bulkMarkPaidBtn.addEventListener('click', async () => {
     for (const entry of pendingEntries) {
         await window.api.togglePaid(entry.id, 1);
     }
-    loadAndRender();
+    // Reload entries and update stats after marking as paid
+    allEntries = await fetchEntries();
+    const newFiltered = filterEntries(allEntries);
+    renderEntries(newFiltered);
+    updatePaidPendingStats(newFiltered);
 });
 
 // Listen for changes on all filter fields
