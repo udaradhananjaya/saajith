@@ -142,6 +142,31 @@ titleSearch.addEventListener('input', triggerFilter);
 dateFrom.addEventListener('change', triggerFilter);
 dateTo.addEventListener('change', triggerFilter);
 
+// Utility to clear all filters and focus category (TomSelect)
+function clearFiltersAndFocusCategory() {
+    // Clear TomSelect category
+    if (category.tomselect) {
+        category.tomselect.clear();
+        category.tomselect.blur(); // Remove focus if any
+        category.tomselect.focus(); // Focus the TomSelect input
+    } else {
+        category.value = '';
+        category.focus();
+    }
+    // Clear other fields
+    titleSearch.value = '';
+    dateFrom.value = '';
+    dateTo.value = '';
+    triggerFilter();
+}
+
+// Listen for ESC key to clear filters and focus category
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        clearFiltersAndFocusCategory();
+    }
+});
+
 // Initial load
 loadAndRender();
 
