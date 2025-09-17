@@ -38,13 +38,27 @@ function filterEntries(entries) {
     if (titleSearch.value.trim()) {
         filtered = filtered.filter(e => (e.title || '').toLowerCase().includes(titleSearch.value.trim().toLowerCase()));
     }
-    if (dateFrom.value) {
-        filtered = filtered.filter(e => new Date(e.created_at) >= new Date(dateFrom.value));
-    }
-    if (dateTo.value) {
+    // Date filtering logic
+    if (dateFrom.value && !dateTo.value) {
+        // Filter for dateFrom day only
+        const fromDate = new Date(dateFrom.value);
+        fromDate.setHours(0, 0, 0, 0);
+        const toDate = new Date(dateFrom.value);
+        toDate.setHours(23, 59, 59, 999);
+        filtered = filtered.filter(e => {
+            const entryDate = new Date(e.created_at);
+            return entryDate >= fromDate && entryDate <= toDate;
+        });
+    } else if (dateFrom.value && dateTo.value) {
+        // Filter for date range
+        const fromDate = new Date(dateFrom.value);
+        fromDate.setHours(0, 0, 0, 0);
         const toDate = new Date(dateTo.value);
-        toDate.setHours(23,59,59,999);
-        filtered = filtered.filter(e => new Date(e.created_at) <= toDate);
+        toDate.setHours(23, 59, 59, 999);
+        filtered = filtered.filter(e => {
+            const entryDate = new Date(e.created_at);
+            return entryDate >= fromDate && entryDate <= toDate;
+        });
     }
     return filtered;
 }
