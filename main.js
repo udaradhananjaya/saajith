@@ -1,6 +1,7 @@
 // main.js
 const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const db = require('./models/db'); // our DB helper
 const isDev = process.env.NODE_ENV === 'development';
 let win;

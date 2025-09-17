@@ -1,0 +1,2 @@
+For dev → npm run dev:electron
+For prod → npm run build && npm start
