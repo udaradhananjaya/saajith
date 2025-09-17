@@ -6,6 +6,12 @@ export default defineConfig({
   base: './',             // important for Electron (relative paths)
   build: {
     outDir: '../dist',    // bundle output
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        index: 'renderer/index.html',
+        queries: 'renderer/queries.html'
+      }
+    }
   }
 })

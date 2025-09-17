@@ -1,15 +1,27 @@
 // main.js
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 const db = require('./models/db'); // our DB helper
 const isDev = process.env.NODE_ENV === 'development';
 let win;
 
+function getIndexPath() {
+  return isDev
+    ? 'http://localhost:5173'
+    : path.join(__dirname, 'dist', 'index.html');
+}
+
+function getQueriesPath() {
+  return isDev
+    ? 'http://localhost:5173/queries.html'
+    : path.join(__dirname, 'dist', 'queries.html');
+}
+
 function createWindow() {
   win = new BrowserWindow({
-    width: 1100,
-    height: 700,
-    autoHideMenuBar: true, // Hides the menu bar
+    width: 1250,
+    height: 800,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -17,15 +29,9 @@ function createWindow() {
     }
   });
 
+  win.setMenuBarVisibility(false);
 
-  let loadTarget;
-  if (isDev) {
-    loadTarget = 'http://localhost:5173';
-  } else {
-    loadTarget = path.join(__dirname, 'dist', 'index.html');
-  }
-  win.setMenuBarVisibility(false); // Ensures menu bar is hidden
-
+  const loadTarget = getIndexPath();
 
   console.log(`[Electron] NODE_ENV=${process.env.NODE_ENV}`);
   console.log(`[Electron] App mode: ${isDev ? 'DEV' : 'PROD'}`);
@@ -43,9 +49,44 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow);
+function registerShortcuts() {
+  // F1 -> index, F2 -> queries
+  globalShortcut.register('F1', () => {
+    if (win) {
+      const target = getIndexPath();
+      if (isDev) {
+        win.loadURL(target);
+      } else {
+        win.loadFile(target);
+      }
+    }
+  });
+
+  globalShortcut.register('F2', () => {
+    if (win) {
+      const target = getQueriesPath();
+      if (isDev) {
+        win.loadURL(target);
+      } else {
+        win.loadFile(target);
+      }
+    }
+  });
+}
+
+function unregisterShortcuts() {
+  globalShortcut.unregisterAll();
+}
+
+app.whenReady().then(() => {
+  createWindow();
+  registerShortcuts();
+});
+
+app.on('will-quit', unregisterShortcuts);
 
 app.on('window-all-closed', () => {
+  unregisterShortcuts();
   if (process.platform !== 'darwin') app.quit();
 });
 
@@ -54,36 +95,31 @@ app.on('activate', () => {
 });
 
 /* ---------- IPC handlers (calls to models/db.js) ---------- */
-ipcMain.handle('db:getEntries', () => {
-  return db.getEntries();
-});
+ipcMain.handle('db:getEntries', () => db.getEntries());
+ipcMain.handle('db:addEntry', (event, entry) => db.addEntry(entry));
+ipcMain.handle('db:togglePaid', (event, id, paid) => db.togglePaid(id, paid));
+ipcMain.handle('db:deleteEntry', (event, id) => db.deleteEntry(id));
+ipcMain.handle('db:editEntry', (event, id, data) => db.editEntry(id, data));
 
-ipcMain.handle('db:addEntry', (event, entry) => {
-  return db.addEntry(entry);
-});
-
-ipcMain.handle('db:togglePaid', (event, id, paid) => {
-  return db.togglePaid(id, paid);
-});
-
-ipcMain.handle('db:deleteEntry', (event, id) => {
-  return db.deleteEntry(id);
-});
-
-ipcMain.handle('db:editEntry', (event, id, data) => {
-  // You need to implement this in your db.js as well!
-  return db.editEntry(id, data);
-});
-
-/* Navigation */
+/* Navigation via contextBridge (optional, for renderer-triggered navigation) */
 ipcMain.on('go-to-index', () => {
   if (win) {
-    win.loadURL('http://localhost:5173');
+    const target = getIndexPath();
+    if (isDev) {
+      win.loadURL(target);
+    } else {
+      win.loadFile(target);
+    }
   }
 });
 
 ipcMain.on('go-to-queries', () => {
   if (win) {
-    win.loadURL('http://localhost:5173/queries.html');
+    const target = getQueriesPath();
+    if (isDev) {
+      win.loadURL(target);
+    } else {
+      win.loadFile(target);
+    }
   }
 });

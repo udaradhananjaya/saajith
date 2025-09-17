@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Queries</title>
+  <script type="module" crossorigin src="./assets/queries-CyDMig1j.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/tom-select.complete-Ddof_xjP.js">
+  <link rel="stylesheet" crossorigin href="./assets/tom-select-CQng-0l1.css">
+</head>
+<body class="p-4">
+  <div class="container">
+    <h1 class="mb-4">Queries</h1>
+    <form id="filterForm" class="row g-3 align-items-end mb-4">
+      <div class="col-md-3">
+        <label for="category" class="form-label">Category</label>
+        <select id="category" placeholder="Category">
+          <option value="">All</option>
+          <option value="Admin">Admin</option>
+          <option value="Gates">Gates</option>
+          <option value="I">I</option>
+          <option value="Marine">Marine</option>
+          <option value="Megaport">Megaport</option>
+          <option value="Mobile">Mobile</option>
+          <option value="O">O</option>
+          <option value="P">P</option>
+          <option value="PEU">PEU</option>
+          <option value="Sales">Sales</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="titleSearch" class="form-label">Title</label>
+        <input type="text" id="titleSearch" class="form-control" placeholder="Search title">
+      </div>
+      <div class="col-md-2">
+        <label for="dateFrom" class="form-label">From</label>
+        <input type="date" id="dateFrom" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label for="dateTo" class="form-label">To</label>
+        <input type="date" id="dateTo" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-dark table-striped align-middle" id="entriesTable">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Created At</th>
+            <th>Paid</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Entries will be loaded here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Vite injects bundle here -->
+</body>
+</html>
