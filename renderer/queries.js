@@ -71,12 +71,21 @@ function renderEntries(entries) {
     }
     entries.forEach(e => {
         const tr = document.createElement('tr');
+        // Determine which categories to display
+        let categoriesToShow;
+        if (category.value) {
+            // Only show the selected category in the column
+            categoriesToShow = [category.value];
+        } else {
+            // Show all categories for the entry
+            categoriesToShow = (e.category || '').split(',').map(cat => cat.trim()).filter(Boolean);
+        }
         tr.innerHTML = `
             <td>${escapeHtml(e.title)}</td>
             <td>Rs. ${e.amount}</td>
             <td>
-            ${(e.category || '').split(',').map(cat =>
-                `<span class="badge bg-secondary ms-1">${escapeHtml(cat.trim())}</span>`
+            ${categoriesToShow.map(cat =>
+                `<span class="badge bg-secondary ms-1">${escapeHtml(cat)}</span>`
             ).join('')}
             </td>
             <td>${new Date(e.created_at).toLocaleString()}</td>
@@ -145,10 +154,74 @@ async function loadAndRender() {
     renderEntries(filterEntries(allEntries));
 }
 
+// Add controls for bulk mark as paid
+const bulkControlsDiv = document.createElement('div');
+bulkControlsDiv.className = 'row g-2 align-items-center mb-3';
+bulkControlsDiv.style.display = 'none'; // hidden by default
+
+bulkControlsDiv.innerHTML = `
+  <div class="col-auto">
+    <input type="number" min="1" id="bulkPaidCount" class="form-control" placeholder="Count" style="width: 100px;">
+  </div>
+  <div class="col-auto">
+    <button id="bulkMarkPaidBtn" class="btn btn-success">Mark as Paid</button>
+  </div>
+  <div class="col-auto">
+    <span id="paidPendingStats" class="ms-2"></span>
+  </div>
+`;
+
+// Insert below filterForm
+filterForm.parentNode.insertBefore(bulkControlsDiv, filterForm.nextSibling);
+
+const bulkPaidCount = bulkControlsDiv.querySelector('#bulkPaidCount');
+const bulkMarkPaidBtn = bulkControlsDiv.querySelector('#bulkMarkPaidBtn');
+const paidPendingStats = bulkControlsDiv.querySelector('#paidPendingStats');
+
 // --- Dynamic Filtering ---
 function triggerFilter() {
-    renderEntries(filterEntries(allEntries));
+    const filtered = filterEntries(allEntries);
+    renderEntries(filtered);
+
+    // Show/hide bulk controls based on filter
+    if (
+        category.value ||
+        titleSearch.value.trim() ||
+        dateFrom.value ||
+        dateTo.value
+    ) {
+        bulkControlsDiv.style.display = '';
+        updatePaidPendingStats(filtered);
+    } else {
+        bulkControlsDiv.style.display = 'none';
+    }
 }
+
+// Update paid/pending stats
+function updatePaidPendingStats(filtered) {
+    const paid = filtered.filter(e => e.paid).length;
+    const pending = filtered.length - paid;
+    paidPendingStats.textContent = `Paid: ${paid} | Pending: ${pending}`;
+}
+
+// Bulk mark as paid handler
+bulkMarkPaidBtn.addEventListener('click', async () => {
+    const filtered = filterEntries(allEntries);
+    const count = parseInt(bulkPaidCount.value, 10);
+    if (!count || count < 1) return;
+
+    // Get oldest pending entries in filtered list
+    const pendingEntries = filtered.filter(e => !e.paid)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .slice(0, count);
+
+    if (pendingEntries.length === 0) return;
+
+    for (const entry of pendingEntries) {
+        await window.api.togglePaid(entry.id, 1);
+    }
+    loadAndRender();
+});
 
 // Listen for changes on all filter fields
 category.addEventListener('change', triggerFilter);
