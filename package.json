@@ -26,13 +26,14 @@
   "dependencies": {
     "better-sqlite3": "^12.2.0",
     "bootstrap": "^5.3.8",
+    "firebase": "^12.3.0",
     "sweetalert2": "^11.23.0",
     "tom-select": "^2.4.3"
   },
   "devDependencies": {
-    "electron": "^38.1.0",
     "concurrently": "^9.2.1",
     "cross-env": "^10.0.0",
+    "electron": "^38.1.0",
     "electron-builder": "^26.0.12",
     "electron-rebuild": "^3.2.9",
     "vite": "^7.1.5",
@@ -58,7 +59,9 @@
       {
         "from": "models/app.db",
         "to": "app.db",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "win": {

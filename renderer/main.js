@@ -12,7 +12,6 @@ import TomSelect from 'tom-select';
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('entryForm');
   const title = document.getElementById('title');
-  const amount = document.getElementById('amount');
   const category = document.getElementById('category');
   const entriesList = document.getElementById('entriesList');
 
@@ -22,16 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Focus title field on page load
   title.focus();
 
-  // Move focus to amount on Enter in title
+  // Move focus to category on Enter in title
   title.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      amount.focus();
-    }
-  });
-
-  // Move focus to category on Enter in amount
-  amount.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       // Focus TomSelect input
@@ -76,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
               : ''
             }
           </div>
-          <div class="text-muted">Rs. ${e.amount} — ${new Date(e.created_at).toLocaleString()}</div>
+          <div class="text-muted">${new Date(e.created_at).toLocaleString()}</div>
         </div>
         <div>
           <button class="btn btn-sm ${e.paid ? 'btn-success' : 'btn-outline-success'} me-2 toggle-paid">${e.paid ? 'Paid' : 'Mark Paid'}</button>
@@ -113,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const entry = { title: title.value.trim(), amount: parseFloat(amount.value) || 0, category: Array.from(category.selectedOptions).map(opt => opt.value).join(', ') };
+    const entry = { title: title.value.trim(), category: Array.from(category.selectedOptions).map(opt => opt.value).join(', ') };
     if (!entry.title) {
       Swal.fire({ icon: 'error', title: 'Title required' });
       return;

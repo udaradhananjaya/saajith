@@ -2,3 +2,6 @@ node_modules/
 models/*.db
 .history/
 release/
+dist/
+firebase-key.txt
+.gitignore
