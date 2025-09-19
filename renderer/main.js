@@ -45,13 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function loadEntries() {
-    const entries = await window.api.getEntries();
+    let entries = await window.api.getEntries();
     entriesList.innerHTML = '';
 
     if (!entries || entries.length === 0) {
       entriesList.innerHTML = '<div class="text-muted">No entries yet</div>';
       return;
     }
+
+    // Only show the latest 100 entries (assuming entries are sorted oldest to newest)
+    entries = entries.slice(-100).reverse(); // newest first
 
     entries.forEach(e => {
       const item = document.createElement('div');
@@ -69,35 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="text-muted">${new Date(e.created_at).toLocaleString()}</div>
         </div>
-        <div>
-          <button class="btn btn-sm ${e.paid ? 'btn-success' : 'btn-outline-success'} me-2 toggle-paid">${e.paid ? 'Paid' : 'Mark Paid'}</button>
-          <button class="btn btn-sm btn-danger delete-entry">Delete</button>
-        </div>
       `;
-
-      // mark paid/unpaid
-      item.querySelector('.toggle-paid').addEventListener('click', async () => {
-        await window.api.togglePaid(e.id, e.paid ? 0 : 1);
-        const action = e.paid ? 'Marked unpaid' : 'Marked paid';
-        Swal.fire({ toast: true, position: 'bottom-end', timer: 1500, title: action, icon: 'success' });
-        loadEntries();
-      });
-
-      // delete entry
-      item.querySelector('.delete-entry').addEventListener('click', async () => {
-        const result = await Swal.fire({
-          title: 'Delete entry?',
-          text: `Do you want to delete "${e.title}"?`,
-          icon: 'warning',
-          showCancelButton: true
-        });
-        if (result.isConfirmed) {
-          await window.api.deleteEntry(e.id);
-          Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Deleted', icon: 'success' });
-          loadEntries();
-        }
-      });
-
       entriesList.appendChild(item);
     });
   }
@@ -112,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await window.api.addEntry(entry);
     form.reset();
     loadEntries();
+    title.focus();
     Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Added', icon: 'success' });
   });
 
