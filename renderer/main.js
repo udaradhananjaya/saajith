@@ -53,8 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Only show the latest 100 entries (assuming entries are sorted oldest to newest)
-    entries = entries.slice(-100).reverse(); // newest first
+    // Sort entries by created_at descending (newest first)
+    entries = entries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    // Only show the latest 100 entries
+    entries = entries.slice(0, 100);
 
     entries.forEach(e => {
       const item = document.createElement('div');
@@ -79,7 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const entry = { title: title.value.trim(), category: Array.from(category.selectedOptions).map(opt => opt.value).join(', ') };
+    const entry = { 
+      title: title.value.trim(), 
+      category: Array.from(category.selectedOptions).map(opt => opt.value).join(', '),
+      created_at: new Date().toISOString() // Add this line
+    };
     if (!entry.title) {
       Swal.fire({ icon: 'error', title: 'Title required' });
       return;
