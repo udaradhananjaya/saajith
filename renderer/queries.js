@@ -1,3 +1,5 @@
+//queries.js
+
 // Import vendor CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -33,7 +35,7 @@ async function fetchEntries() {
 function filterEntries(entries) {
     let filtered = entries;
     if (category.value) {
-        filtered = filtered.filter(e => (e.category || '').split(',').map(c => c.trim()).includes(category.value));
+        filtered = filtered.filter(e => Array.isArray(e.categories) && e.categories.includes(category.value));
     }
     if (titleSearch.value.trim()) {
         filtered = filtered.filter(e => (e.title || '').toLowerCase().includes(titleSearch.value.trim().toLowerCase()));
@@ -74,37 +76,57 @@ function renderEntries(entries) {
         // Determine which categories to display
         let categoriesToShow;
         if (category.value) {
-            // Only show the selected category in the column
             categoriesToShow = [category.value];
         } else {
-            // Show all categories for the entry
-            categoriesToShow = (e.category || '').split(',').map(cat => cat.trim()).filter(Boolean);
+            categoriesToShow = Array.isArray(e.categories) ? e.categories : [];
         }
+        // Determine paid status for shown categories
+        let paidForShown = Array.isArray(e.paid_categories)
+            ? categoriesToShow.every(cat => e.paid_categories.includes(cat))
+            : false;
+
+        // Get paid date for shown categories (if you want to show per-category paid date)
+        let paidDates = e.completed_dates || {};
+
         tr.innerHTML = `
             <td>${escapeHtml(e.title)}</td>
             <td>
             ${categoriesToShow.map(cat =>
-                `<span class="badge bg-secondary ms-1">${escapeHtml(cat)}</span>`
+                `<span class="badge ms-1 ${Array.isArray(e.paid_categories) && e.paid_categories.includes(cat) ? 'bg-success text-dark' : 'bg-secondary'}" style="${Array.isArray(e.paid_categories) && e.paid_categories.includes(cat) ? 'background-color:#b6fcb6;color:#155724;' : ''}">
+                    ${escapeHtml(cat)}
+                    ${paidDates[cat] ? `<small class="ms-1" style="font-size:10px;">(${new Date(paidDates[cat]).toLocaleDateString('en-GB')})</small>` : ''}
+                </span>`
             ).join('')}
             </td>
             <td>${new Date(e.created_at).toLocaleDateString('en-GB')}</td>
-            <td>${
-                e.completed_date
-                    ? new Date(e.completed_date).toLocaleDateString('en-GB')
-                    : ''
-            }</td>
             <td>
-            <button class="btn btn-sm ${e.paid ? 'btn-success' : 'btn-outline-success'} mark-paid">${e.paid ? 'Paid' : 'Mark Paid'}</button>
+                ${
+                    // Show the most recent paid date among shown categories, or blank
+                    (() => {
+                        const shownPaidDates = categoriesToShow
+                            .map(cat => paidDates[cat])
+                            .filter(Boolean)
+                            .sort((a, b) => new Date(b) - new Date(a));
+                        return shownPaidDates.length
+                            ? new Date(shownPaidDates[0]).toLocaleDateString('en-GB')
+                            : '';
+                    })()
+                }
+            </td>
+            <td>
+            <button class="btn btn-sm ${paidForShown ? 'btn-success' : 'btn-outline-success'} mark-paid">${paidForShown ? 'Paid' : 'Mark Paid'}</button>
             </td>
             <td>
             <button class="btn btn-sm btn-warning edit-entry">Edit</button>
             <button class="btn btn-sm btn-danger delete-entry">Delete</button>
             </td>
         `;
-        // Mark Paid/Unpaid
+        // Mark Paid/Unpaid for shown categories
         tr.querySelector('.mark-paid').addEventListener('click', async () => {
-            await window.api.togglePaid(e.id, e.paid ? 0 : 1);
-            loadAndRender();
+            await window.api.markEntryCategoriesPaid(e.id, categoriesToShow, !paidForShown);
+            // After marking, reload and update stats
+            await loadAndRender();
+            updatePaidPendingStats(filterEntries(allEntries));
         });
         // Edit
         tr.querySelector('.edit-entry').addEventListener('click', async () => {
@@ -203,8 +225,18 @@ function triggerFilter() {
 
 // Update paid/pending stats
 function updatePaidPendingStats(filtered) {
-    const paid = filtered.filter(e => e.paid).length;
-    const pending = filtered.length - paid;
+    // Count paid for shown categories
+    let paid = 0, pending = 0;
+    filtered.forEach(e => {
+        let categoriesToShow = category.value ? [category.value] : (Array.isArray(e.categories) ? e.categories : []);
+        if (Array.isArray(e.paid_categories)) {
+            paid += categoriesToShow.filter(cat => e.paid_categories.includes(cat)).length;
+            pending += categoriesToShow.filter(cat => !e.paid_categories.includes(cat)).length;
+        } else {
+            paid += 0;
+            pending += categoriesToShow.length;
+        }
+    });
     paidPendingStats.textContent = `Paid: ${paid} | Pending: ${pending}`;
 }
 
@@ -215,14 +247,21 @@ bulkMarkPaidBtn.addEventListener('click', async () => {
     if (!count || count < 1) return;
 
     // Get oldest pending entries in filtered list
-    const pendingEntries = filtered.filter(e => !e.paid)
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-        .slice(0, count);
+    const pendingEntries = filtered.filter(e => {
+        let categoriesToShow = category.value ? [category.value] : (Array.isArray(e.categories) ? e.categories : []);
+        if (Array.isArray(e.paid_categories)) {
+            return categoriesToShow.some(cat => !e.paid_categories.includes(cat));
+        }
+        return false;
+    })
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    .slice(0, count);
 
     if (pendingEntries.length === 0) return;
 
     for (const entry of pendingEntries) {
-        await window.api.togglePaid(entry.id, 1);
+        let categoriesToShow = category.value ? [category.value] : (Array.isArray(entry.categories) ? entry.categories : []);
+        await window.api.markEntryCategoriesPaid(entry.id, categoriesToShow, true);
     }
     // Reload entries and update stats after marking as paid
     allEntries = await fetchEntries();

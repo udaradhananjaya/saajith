@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div>
           <div>
             <strong>${escapeHtml(e.title)}</strong>
-            ${e.category
-              ? e.category.split(',').map(cat =>
-                  `<span class="badge bg-secondary ms-1">${escapeHtml(cat.trim())}</span>`
+            ${e.categories && e.categories.length
+              ? e.categories.map(cat =>
+                  `<span class="badge bg-secondary ms-1">${escapeHtml(cat)}</span>`
                 ).join('')
               : ''
             }
@@ -104,7 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const entry = { title: title.value.trim(), category: Array.from(category.selectedOptions).map(opt => opt.value).join(', ') };
+    const entry = {
+      title: title.value.trim(),
+      categories: Array.from(category.selectedOptions).map(opt => opt.value)
+    };
     if (!entry.title) {
       Swal.fire({ icon: 'error', title: 'Title required' });
       return;

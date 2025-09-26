@@ -102,6 +102,11 @@ ipcMain.handle('db:togglePaid', (event, id, paid) => db.togglePaid(id, paid));
 ipcMain.handle('db:deleteEntry', (event, id) => db.deleteEntry(id));
 ipcMain.handle('db:editEntry', (event, id, data) => db.editEntry(id, data));
 
+// New: Mark specific categories as paid/unpaid for an entry
+ipcMain.handle('db:markEntryCategoriesPaid', (event, entryId, categories, paid) => {
+  return db.markEntryCategoriesPaid(entryId, categories, paid);
+});
+
 /* Navigation via contextBridge (optional, for renderer-triggered navigation) */
 ipcMain.on('go-to-index', () => {
   if (win) {

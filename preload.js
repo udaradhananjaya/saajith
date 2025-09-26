@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
   togglePaid: (id, paid) => ipcRenderer.invoke('db:togglePaid', id, paid),
   deleteEntry: (id) => ipcRenderer.invoke('db:deleteEntry', id),
   editEntry: (id, data) => ipcRenderer.invoke('db:editEntry', id, data),
+  markEntryCategoriesPaid: (entryId, categories, paid) => ipcRenderer.invoke('db:markEntryCategoriesPaid', entryId, categories, paid),
   goToIndex: () => ipcRenderer.send('go-to-index'),
   goToQueries: () => ipcRenderer.send('go-to-queries')
 });
