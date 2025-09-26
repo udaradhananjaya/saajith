@@ -10,11 +10,13 @@
     <h1 class="mb-4">Add Entries</h1>
 
     <form id="entryForm" class="row g-3 mb-3">
-      <div class="col-md-12">
+      <div class="col-12">
+        <label for="title" class="form-label">Title</label>
         <input id="title" class="form-control" placeholder="Title" required />
       </div>
-      <div class="col-md-12 mt-0">
-        <select id="category" multiple placeholder="Category">
+      <div class="col-12">
+        <label for="category" class="form-label">Category</label>
+        <select id="category" class="form-select" multiple>
           <option value="Admin" selected>Admin</option>
           <option value="CPU" selected>CPU</option>
           <option value="Gates" selected>Gates</option>
@@ -34,8 +36,8 @@
           <option value="VRIU" selected>VRIU</option>
         </select>
       </div>
-      <div class="col-md-12 d-flex flex-column justify-content-between">
-        <button class="btn btn-primary w-100 h-100" type="submit" style="min-height: 100px;">Add</button>
+      <div class="col-12">
+        <button class="btn btn-primary w-100 py-3" type="submit">Add</button>
       </div>
     </form>
 
