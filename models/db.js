@@ -179,6 +179,11 @@ function markEntryCategoriesPaid(entryId, categoryNames, paid) {
   }
 }
 
+function titleExists(title) {
+  const row = db.prepare("SELECT 1 FROM entries WHERE title = ? LIMIT 1").get(title);
+  return !!row;
+}
+
 module.exports = {
   getCategories,
   addCategory,
@@ -189,5 +194,6 @@ module.exports = {
   getEntries,
   getEntryById,
   deleteEntry,
-  markEntryCategoriesPaid
+  markEntryCategoriesPaid,
+  titleExists,
 };

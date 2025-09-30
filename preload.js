@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('api', {
   deleteEntry: (id) => ipcRenderer.invoke('db:deleteEntry', id),
   editEntry: (id, data) => ipcRenderer.invoke('db:editEntry', id, data),
   markEntryCategoriesPaid: (entryId, categories, paid) => ipcRenderer.invoke('db:markEntryCategoriesPaid', entryId, categories, paid),
+  titleExists: (title) => ipcRenderer.invoke('db:titleExists', title),
   goToIndex: () => ipcRenderer.send('go-to-index'),
   goToQueries: () => ipcRenderer.send('go-to-queries')
 });

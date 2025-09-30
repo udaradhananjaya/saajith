@@ -89,6 +89,14 @@ document.addEventListener('DOMContentLoaded', () => {
       Swal.fire({ icon: 'error', title: 'Title required' });
       return;
     }
+
+    // Check if title exists in the database via backend
+    const exists = await window.api.titleExists(entry.title);
+    if (exists) {
+      Swal.fire({ icon: 'error', title: 'Title already exists' });
+      return;
+    }
+
     await window.api.addEntry(entry);
     form.reset();
     loadEntries();

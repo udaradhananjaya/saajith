@@ -2,7 +2,7 @@
 const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const db = require('./models/db'); // our DB helper
+const db = require('./models/db');
 const isDev = process.env.NODE_ENV === 'development';
 let win;
 
@@ -101,11 +101,8 @@ ipcMain.handle('db:addEntry', (event, entry) => db.addEntry(entry));
 ipcMain.handle('db:togglePaid', (event, id, paid) => db.togglePaid(id, paid));
 ipcMain.handle('db:deleteEntry', (event, id) => db.deleteEntry(id));
 ipcMain.handle('db:editEntry', (event, id, data) => db.editEntry(id, data));
-
-// New: Mark specific categories as paid/unpaid for an entry
-ipcMain.handle('db:markEntryCategoriesPaid', (event, entryId, categories, paid) => {
-  return db.markEntryCategoriesPaid(entryId, categories, paid);
-});
+ipcMain.handle('db:markEntryCategoriesPaid', (event, entryId, categories, paid) => db.markEntryCategoriesPaid(entryId, categories, paid));
+ipcMain.handle('db:titleExists', (event, title) => db.titleExists(title));
 
 /* Navigation via contextBridge (optional, for renderer-triggered navigation) */
 ipcMain.on('go-to-index', () => {
