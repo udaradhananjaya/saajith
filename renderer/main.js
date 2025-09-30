@@ -96,6 +96,15 @@ document.addEventListener('DOMContentLoaded', () => {
     Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Added', icon: 'success' });
   });
 
+  // Mask title field: only allow up to 6 digits
+  title.addEventListener('input', (e) => {
+    // Remove non-digit characters
+    let val = e.target.value.replace(/\D/g, '');
+    // Limit to 6 digits
+    if (val.length > 6) val = val.slice(0, 6);
+    e.target.value = val;
+  });
+
   function escapeHtml(s) {
     return s ? s.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])) : '';
   }
