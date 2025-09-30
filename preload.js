@@ -10,5 +10,11 @@ contextBridge.exposeInMainWorld('api', {
   markEntryCategoriesPaid: (entryId, categories, paid) => ipcRenderer.invoke('db:markEntryCategoriesPaid', entryId, categories, paid),
   titleExists: (title) => ipcRenderer.invoke('db:titleExists', title),
   goToIndex: () => ipcRenderer.send('go-to-index'),
-  goToQueries: () => ipcRenderer.send('go-to-queries')
+  goToQueries: () => ipcRenderer.send('go-to-queries'),
+  getCategories: () => ipcRenderer.invoke('db:getCategories'),
+  addCategory: (name, rate) => ipcRenderer.invoke('db:addCategory', name, rate),
+  editCategory: (id, name, rate) => ipcRenderer.invoke('db:editCategory', id, name, rate),
+  deleteCategory: (id) => ipcRenderer.invoke('db:deleteCategory', id),
+  getCategoryById: (id) => ipcRenderer.invoke('db:getCategoryById', id),
+  goToSettings: () => ipcRenderer.send('go-to-settings')
 });

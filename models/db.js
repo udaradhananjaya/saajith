@@ -23,7 +23,7 @@ let db;
 app.whenReady().then(() => {
   db = new Database(resolveDbPath());
 
-  // Create entries table (if not exists)
+  // Create entries table
   db.exec(`
     CREATE TABLE IF NOT EXISTS entries (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,13 +33,20 @@ app.whenReady().then(() => {
     );
   `);
 
-  // Create categories table
+  // Create categories table with rate column
   db.exec(`
     CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE NOT NULL
+      name TEXT UNIQUE NOT NULL,
+      rate REAL DEFAULT 0
     );
   `);
+
+  // Migration: add rate column if missing
+  const pragma = db.prepare("PRAGMA table_info(categories)").all();
+  if (!pragma.some(col => col.name === "rate")) {
+    db.exec("ALTER TABLE categories ADD COLUMN rate REAL DEFAULT 0");
+  }
 
   // Create join table for many-to-many relationship
   db.exec(`
@@ -115,25 +122,36 @@ function editEntry(id, data) {
   return { changes: info.changes };
 }
 
-// Example helper to get all categories
+// CRUD for categories
 function getCategories() {
   return db.prepare("SELECT * FROM categories ORDER BY name").all();
 }
 
-// Example helper to add a category (returns id)
-function addCategory(name) {
-  const stmt = db.prepare("INSERT OR IGNORE INTO categories (name) VALUES (?)");
-  stmt.run(name);
-  return db.prepare("SELECT id FROM categories WHERE name = ?").get(name).id;
+function addCategory(name, rate = 0) {
+  const stmt = db.prepare("INSERT OR IGNORE INTO categories (name, rate) VALUES (?, ?)");
+  stmt.run(name, rate);
+  return db.prepare("SELECT * FROM categories WHERE name = ?").get(name);
+}
+
+function editCategory(id, name, rate) {
+  const stmt = db.prepare("UPDATE categories SET name = ?, rate = ? WHERE id = ?");
+  return stmt.run(name, rate, id);
+}
+
+function deleteCategory(id) {
+  return db.prepare("DELETE FROM categories WHERE id = ?").run(id);
+}
+
+function getCategoryById(id) {
+  return db.prepare("SELECT * FROM categories WHERE id = ?").get(id);
 }
 
 // Example helper to link entry to categories
 function linkEntryCategories(entryId, categoryNames) {
-  // Remove existing links
   db.prepare("DELETE FROM entry_categories WHERE entry_id = ?").run(entryId);
-  // Add new links
   for (const name of categoryNames) {
-    const catId = addCategory(name);
+    const cat = addCategory(name); // returns { id, name, rate }
+    const catId = cat.id;
     db.prepare("INSERT OR IGNORE INTO entry_categories (entry_id, category_id) VALUES (?, ?)").run(entryId, catId);
   }
 }
@@ -187,6 +205,9 @@ function titleExists(title) {
 module.exports = {
   getCategories,
   addCategory,
+  editCategory,
+  deleteCategory,
+  getCategoryById,
   addEntry,
   editEntry,
   editEntryCategories,

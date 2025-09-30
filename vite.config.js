@@ -10,7 +10,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: 'renderer/index.html',
-        queries: 'renderer/queries.html'
+        queries: 'renderer/queries.html',
+        settings: 'renderer/settings.html'
       }
     }
   }

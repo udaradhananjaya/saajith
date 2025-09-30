@@ -18,6 +18,12 @@ function getQueriesPath() {
     : path.join(__dirname, 'dist', 'queries.html');
 }
 
+function getSettingsPath() {
+  return isDev
+    ? 'http://localhost:5173/settings.html'
+    : path.join(__dirname, 'dist', 'settings.html');
+}
+
 function createWindow() {
   win = new BrowserWindow({
     width: 1250,
@@ -73,6 +79,18 @@ function registerShortcuts() {
       }
     }
   });
+
+  // F3 -> settings
+  globalShortcut.register('F3', () => {
+    if (win) {
+      const target = getSettingsPath();
+      if (isDev) {
+        win.loadURL(target);
+      } else {
+        win.loadFile(target);
+      }
+    }
+  });
 }
 
 function unregisterShortcuts() {
@@ -103,6 +121,11 @@ ipcMain.handle('db:deleteEntry', (event, id) => db.deleteEntry(id));
 ipcMain.handle('db:editEntry', (event, id, data) => db.editEntry(id, data));
 ipcMain.handle('db:markEntryCategoriesPaid', (event, entryId, categories, paid) => db.markEntryCategoriesPaid(entryId, categories, paid));
 ipcMain.handle('db:titleExists', (event, title) => db.titleExists(title));
+ipcMain.handle('db:getCategories', () => db.getCategories());
+ipcMain.handle('db:addCategory', (event, name, rate) => db.addCategory(name, rate));
+ipcMain.handle('db:editCategory', (event, id, name, rate) => db.editCategory(id, name, rate));
+ipcMain.handle('db:deleteCategory', (event, id) => db.deleteCategory(id));
+ipcMain.handle('db:getCategoryById', (event, id) => db.getCategoryById(id));
 
 /* Navigation via contextBridge (optional, for renderer-triggered navigation) */
 ipcMain.on('go-to-index', () => {
@@ -119,6 +142,17 @@ ipcMain.on('go-to-index', () => {
 ipcMain.on('go-to-queries', () => {
   if (win) {
     const target = getQueriesPath();
+    if (isDev) {
+      win.loadURL(target);
+    } else {
+      win.loadFile(target);
+    }
+  }
+});
+
+ipcMain.on('go-to-settings', () => {
+  if (win) {
+    const target = getSettingsPath();
     if (isDev) {
       win.loadURL(target);
     } else {
