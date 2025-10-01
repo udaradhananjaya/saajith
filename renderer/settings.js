@@ -1,3 +1,14 @@
+// Import vendor CSS
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import 'tom-select/dist/css/tom-select.css';
+import './styles.css';
+
+// Import vendor JS
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import Swal from 'sweetalert2';
+import TomSelect from 'tom-select';
+
 const form = document.getElementById('categoryForm');
 const catName = document.getElementById('catName');
 const catRate = document.getElementById('catRate');
@@ -9,10 +20,14 @@ async function loadCategories() {
   categories.forEach(cat => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input value="${cat.name}" data-id="${cat.id}" class="edit-name" /></td>
-      <td><input type="number" step="0.01" value="${cat.rate}" data-id="${cat.id}" class="edit-rate" /></td>
       <td>
-        <button data-id="${cat.id}" class="delete-cat">Delete</button>
+        <input value="${cat.name}" data-id="${cat.id}" class="form-control form-control-sm edit-name" />
+      </td>
+      <td>
+        <input type="number" step="5" value="${cat.rate}" data-id="${cat.id}" class="form-control form-control-sm edit-rate" />
+      </td>
+      <td>
+        <button data-id="${cat.id}" class="btn btn-sm btn-danger delete-cat">Delete</button>
       </td>
     `;
     tableBody.appendChild(tr);
