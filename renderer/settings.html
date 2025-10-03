@@ -7,17 +7,24 @@
 <body class="bg-dark text-light">
   <div class="container py-4">
     <h1 class="mb-4">Category Settings</h1>
-    <form id="categoryForm" class="row g-3 mb-4">
-      <div class="col-md-5">
-        <input id="catName" class="form-control" placeholder="Category Name" required />
+    <div class="card mb-4">
+      <div class="card-header">
+        Add a new category
       </div>
-      <div class="col-md-3">
-        <input id="catRate" type="number" step="5" class="form-control" placeholder="Rate" required />
+      <div class="card-body">
+        <form id="categoryForm" class="row g-3">
+          <div class="col-md-5">
+            <input id="catName" class="form-control" placeholder="Category Name" required />
+          </div>
+          <div class="col-md-5">
+            <input id="catRate" type="number" step="5" class="form-control" placeholder="Rate" required />
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Add Category</button>
+          </div>
+        </form>
       </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Add Category</button>
-      </div>
-    </form>
+    </div>
     <div class="table-responsive">
       <table id="categoriesTable" class="table table-bordered table-hover align-middle bg-dark text-light">
         <thead class="table-secondary">
