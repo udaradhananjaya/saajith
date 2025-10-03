@@ -9,14 +9,35 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Swal from 'sweetalert2';
 import TomSelect from 'tom-select';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('entryForm');
   const title = document.getElementById('title');
   const category = document.getElementById('category');
   const entriesList = document.getElementById('entriesList');
 
-  // Initialize TomSelect on the category dropdown
-  const tomSelectCategory = new TomSelect('#category', { create: false, sortField: { field: 'text', direction: 'asc' } });
+  // --- Populate category select from DB ---
+  async function populateCategories() {
+    const categories = await window.api.getCategories();
+    category.innerHTML = ''; // Clear existing options
+    categories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat.name;
+      opt.textContent = cat.name;
+      opt.selected = true; // Select all by default
+      category.appendChild(opt);
+    });
+    // Re-init TomSelect after options update
+    if (category.tomselect) {
+      category.tomselect.destroy();
+    }
+    new TomSelect('#category', { 
+      create: false, 
+      sortField: { field: 'text', direction: 'asc' },
+      maxItems: null // Allow selecting all
+    });
+  }
+
+  await populateCategories();
 
   // Focus title field on page load
   title.focus();
@@ -25,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
   title.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      // Focus TomSelect input
       if (category.tomselect) {
         category.tomselect.focus();
       } else {
@@ -39,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') {
       e.preventDefault();
       form.requestSubmit();
-      // Focus title after submit (with a slight delay to ensure form reset)
       setTimeout(() => title.focus(), 10);
     }
   });
@@ -53,9 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Sort entries by created_at descending (newest first)
     entries = entries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    // Only show the latest 100 entries
     entries = entries.slice(0, 100);
 
     entries.forEach(e => {
@@ -99,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     await window.api.addEntry(entry);
     form.reset();
+    await populateCategories(); // In case categories were changed elsewhere
     loadEntries();
     title.focus();
     Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Added', icon: 'success' });
@@ -106,9 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Mask title field: only allow up to 6 digits
   title.addEventListener('input', (e) => {
-    // Remove non-digit characters
     let val = e.target.value.replace(/\D/g, '');
-    // Limit to 6 digits
     if (val.length > 6) val = val.slice(0, 6);
     e.target.value = val;
   });
@@ -119,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadEntries();
 });
-
 
 // Navigate to queries.html on F2 key press
 window.addEventListener('keydown', (e) => {
