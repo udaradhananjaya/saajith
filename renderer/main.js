@@ -65,15 +65,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function loadEntries() {
     let entries = await window.api.getEntries();
+
+    // Filter for today's entries only
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    entries = entries.filter(e => {
+      const entryDate = new Date(e.created_at);
+      return entryDate >= today && entryDate < tomorrow;
+    });
+
+    // Sort by created_at descending
+    entries = entries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
     entriesList.innerHTML = '';
 
     if (!entries || entries.length === 0) {
       entriesList.innerHTML = '<div class="text-muted">No entries yet</div>';
       return;
     }
-
-    entries = entries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    entries = entries.slice(0, 100);
 
     entries.forEach(e => {
       const item = document.createElement('div');
