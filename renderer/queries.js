@@ -11,12 +11,6 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Swal from 'sweetalert2';
 import TomSelect from 'tom-select';
 
-// Initialize TomSelect
-new TomSelect('#category', {
-    create: false,
-    maxItems: 1,
-    sortField: { field: 'text', direction: 'asc' }
-});
 
 const entriesTableBody = document.querySelector('#entriesTable tbody');
 const filterForm = document.getElementById('filterForm');
@@ -179,6 +173,31 @@ async function loadAndRender() {
     allEntries = allEntries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     renderEntries(filterEntries(allEntries));
 }
+
+// --- Populate category select from DB ---
+async function populateCategories() {
+    const categories = await window.api.getCategories();
+    category.innerHTML = '<option value="">All Categories</option>'; // Optionally add "All"
+    categories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.name;
+        opt.textContent = cat.name;
+        // Do NOT set opt.selected, so nothing is selected by default
+        category.appendChild(opt);
+    });
+    // Re-init TomSelect after options update
+    if (category.tomselect) {
+        category.tomselect.destroy();
+    }
+    new TomSelect('#category', {
+        create: false,
+        maxItems: 1,
+        sortField: { field: 'text', direction: 'asc' }
+    });
+}
+
+// Call this on page load
+populateCategories();
 
 // Add controls for bulk mark as paid
 const bulkControlsDiv = document.createElement('div');
