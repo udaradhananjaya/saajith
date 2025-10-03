@@ -115,8 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     await window.api.addEntry(entry);
-    form.reset();
-    await populateCategories(); // In case categories were changed elsewhere
+    title.value = ''; // Only clear the title field
     loadEntries();
     title.focus();
     Swal.fire({ toast: true, position: 'bottom-end', timer: 1400, title: 'Added', icon: 'success' });
