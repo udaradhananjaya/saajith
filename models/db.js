@@ -33,6 +33,12 @@ app.whenReady().then(() => {
     );
   `);
 
+  // Migration: add detained column if missing
+  const entriesPragma = db.prepare("PRAGMA table_info(entries)").all();
+  if (!entriesPragma.some(col => col.name === "detained")) {
+    db.exec("ALTER TABLE entries ADD COLUMN detained INTEGER DEFAULT 0");
+  }
+
   // Create categories table with rate column
   db.exec(`
     CREATE TABLE IF NOT EXISTS categories (
