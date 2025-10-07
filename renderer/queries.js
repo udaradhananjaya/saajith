@@ -135,11 +135,19 @@ function renderEntries(entries) {
                 title: '<span style="font-size:1.6rem;">Edit Entry</span>',
                 html:
                     `<div style="display:flex;flex-direction:column;align-items:center;">
-                        <input id="swal-title" class="swal2-input mb-3" placeholder="Title" value="${escapeHtml(e.title)}" style="width:320px;margin-bottom:18px;">
+                        <input id="swal-title" class="swal2-input mb-3" placeholder="Entry Number" value="${escapeHtml(e.title)}" maxlength="6" style="width:320px;margin-bottom:18px;">
                         <label class="mb-2" style="font-size:1.1rem;">Categories:</label>
                         <select id="swal-categories" multiple style="width:100%;min-width:400px;min-height:60px;margin-bottom:18px;">${optionsHtml}</select>
                     </div>`,
                 didOpen: () => {
+                    // Mask input: only allow up to 6 digits
+                    const entryInput = document.getElementById('swal-title');
+                    entryInput.addEventListener('input', (e) => {
+                        let val = e.target.value.replace(/\D/g, '');
+                        if (val.length > 6) val = val.slice(0, 6);
+                        e.target.value = val;
+                    });
+
                     new TomSelect('#swal-categories', {
                         create: true,
                         remove_button: true,
@@ -147,27 +155,45 @@ function renderEntries(entries) {
                         maxItems: null,
                         sortField: { field: 'text', direction: 'asc' }
                     });
+
                     // Make the modal wider and dark
                     const popup = document.querySelector('.swal2-popup');
                     popup.style.width = '600px';
                     popup.style.background = '#23272b';
                     popup.style.color = '#fff';
-                    // Style TomSelect for dark mode
-                    const tomSelectControl = document.querySelector('.ts-control');
-                    if (tomSelectControl) {
-                        tomSelectControl.style.background = '#23272b';
-                        tomSelectControl.style.color = '#fff';
-                        tomSelectControl.style.borderColor = '#444';
-                    }
-                    document.querySelectorAll('.ts-dropdown, .ts-dropdown .option').forEach(el => {
-                        el.style.background = '#23272b';
-                        el.style.color = '#fff';
-                    });
+
+                    // Style TomSelect for dark mode and match entry field background
+                    setTimeout(() => {
+                        const entryBg = window.getComputedStyle(entryInput).backgroundColor;
+                        const tomSelectControl = document.querySelector('.ts-control');
+                        if (tomSelectControl) {
+                            tomSelectControl.style.background = entryBg;
+                            tomSelectControl.style.color = '#fff';
+                            tomSelectControl.style.borderColor = '#444';
+                        }
+                        document.querySelectorAll('.ts-dropdown, .ts-dropdown .option').forEach(el => {
+                            el.style.background = entryBg;
+                            el.style.color = '#fff';
+                        });
+                    }, 0);
                 },
                 focusConfirm: false,
                 confirmButtonColor: '#6366f1',
-                preConfirm: () => {
+                preConfirm: async () => {
                     const title = document.getElementById('swal-title').value;
+                    // Validate: only 1-6 digits
+                    if (!/^\d{1,6}$/.test(title)) {
+                        Swal.showValidationMessage('Entry number must be 1-6 digits (0-9)');
+                        document.getElementById('swal-title').focus();
+                        return false;
+                    }
+                    // Check for duplicate entry number in DB (excluding current entry)
+                    const entries = await window.api.getEntries();
+                    if (entries.some(en => en.title === title && en.id !== e.id)) {
+                        Swal.showValidationMessage('Entry number already exists');
+                        document.getElementById('swal-title').focus();
+                        return false;
+                    }
                     const categories = Array.from(document.getElementById('swal-categories').selectedOptions).map(opt => opt.value);
                     return [title, categories];
                 }
