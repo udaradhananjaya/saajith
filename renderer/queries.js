@@ -124,23 +124,45 @@ function renderEntries(entries) {
         });
         // Edit
         tr.querySelector('.edit-entry').addEventListener('click', async () => {
+            // Get all categories from DB
+            const allCategories = await window.api.getCategories();
+            // Get categories for this entry
+            const entryCategories = Array.isArray(e.categories) ? e.categories : [];
+
+            // Build options for TomSelect
+            const optionsHtml = allCategories.map(cat =>
+                `<option value="${cat.name}"${entryCategories.includes(cat.name) ? ' selected' : ''}>${cat.name}</option>`
+            ).join('');
+
+            // Show SweetAlert2 with TomSelect field
             const { value: formValues } = await Swal.fire({
                 title: 'Edit Entry',
                 html:
                     `<input id="swal-title" class="swal2-input" placeholder="Title" value="${escapeHtml(e.title)}">` +
-                    `<input id="swal-amount" type="number" step="0.01" class="swal2-input" placeholder="Amount" value="${e.amount}">`,
+                    `<select id="swal-categories" multiple class="swal2-input" style="min-width:200px;">${optionsHtml}</select>`,
+                didOpen: () => {
+                    // Initialize TomSelect on the select field
+                    new TomSelect('#swal-categories', {
+                        create: true, // Allow adding new categories
+                        remove_button: true,
+                        persist: false,
+                        maxItems: null,
+                        sortField: { field: 'text', direction: 'asc' }
+                    });
+                },
                 focusConfirm: false,
                 preConfirm: () => {
-                    return [
-                        document.getElementById('swal-title').value,
-                        document.getElementById('swal-amount').value
-                    ]
+                    const title = document.getElementById('swal-title').value;
+                    // Get selected categories from TomSelect
+                    const categories = Array.from(document.getElementById('swal-categories').selectedOptions).map(opt => opt.value);
+                    return [title, categories];
                 }
             });
+
             if (formValues) {
                 await window.api.editEntry(e.id, {
                     title: formValues[0],
-                    amount: parseFloat(formValues[1]) || 0
+                    categories: formValues[1]
                 });
                 loadAndRender();
             }
