@@ -124,36 +124,50 @@ function renderEntries(entries) {
         });
         // Edit
         tr.querySelector('.edit-entry').addEventListener('click', async () => {
-            // Get all categories from DB
             const allCategories = await window.api.getCategories();
-            // Get categories for this entry
             const entryCategories = Array.isArray(e.categories) ? e.categories : [];
 
-            // Build options for TomSelect
             const optionsHtml = allCategories.map(cat =>
                 `<option value="${cat.name}"${entryCategories.includes(cat.name) ? ' selected' : ''}>${cat.name}</option>`
             ).join('');
 
-            // Show SweetAlert2 with TomSelect field
             const { value: formValues } = await Swal.fire({
-                title: 'Edit Entry',
+                title: '<span style="font-size:1.6rem;">Edit Entry</span>',
                 html:
-                    `<input id="swal-title" class="swal2-input" placeholder="Title" value="${escapeHtml(e.title)}">` +
-                    `<select id="swal-categories" multiple class="swal2-input" style="min-width:200px;">${optionsHtml}</select>`,
+                    `<div style="display:flex;flex-direction:column;align-items:center;">
+                        <input id="swal-title" class="swal2-input mb-3" placeholder="Title" value="${escapeHtml(e.title)}" style="width:320px;margin-bottom:18px;">
+                        <label class="mb-2" style="font-size:1.1rem;">Categories:</label>
+                        <select id="swal-categories" multiple style="width:100%;min-width:400px;min-height:60px;margin-bottom:18px;">${optionsHtml}</select>
+                    </div>`,
                 didOpen: () => {
-                    // Initialize TomSelect on the select field
                     new TomSelect('#swal-categories', {
-                        create: true, // Allow adding new categories
+                        create: true,
                         remove_button: true,
                         persist: false,
                         maxItems: null,
                         sortField: { field: 'text', direction: 'asc' }
                     });
+                    // Make the modal wider and dark
+                    const popup = document.querySelector('.swal2-popup');
+                    popup.style.width = '600px';
+                    popup.style.background = '#23272b';
+                    popup.style.color = '#fff';
+                    // Style TomSelect for dark mode
+                    const tomSelectControl = document.querySelector('.ts-control');
+                    if (tomSelectControl) {
+                        tomSelectControl.style.background = '#23272b';
+                        tomSelectControl.style.color = '#fff';
+                        tomSelectControl.style.borderColor = '#444';
+                    }
+                    document.querySelectorAll('.ts-dropdown, .ts-dropdown .option').forEach(el => {
+                        el.style.background = '#23272b';
+                        el.style.color = '#fff';
+                    });
                 },
                 focusConfirm: false,
+                confirmButtonColor: '#6366f1',
                 preConfirm: () => {
                     const title = document.getElementById('swal-title').value;
-                    // Get selected categories from TomSelect
                     const categories = Array.from(document.getElementById('swal-categories').selectedOptions).map(opt => opt.value);
                     return [title, categories];
                 }
