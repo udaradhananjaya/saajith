@@ -149,7 +149,7 @@ function renderEntries(entries) {
                     });
 
                     new TomSelect('#swal-categories', {
-                        create: true,
+                        create: false,
                         remove_button: true,
                         persist: false,
                         maxItems: null,
@@ -305,20 +305,44 @@ function triggerFilter() {
 }
 
 // Update paid/pending stats
-function updatePaidPendingStats(filtered) {
-    // Count paid for shown categories
-    let paid = 0, pending = 0;
+async function updatePaidPendingStats(filtered) {
+    // Get all categories with rates
+    const allCategories = await window.api.getCategories();
+
+    // Count paid and pending for shown categories
+    let paid = 0, pending = 0, pendingAmount = 0;
+    let selectedCategory = category.value;
+    let selectedRate = 0;
+
+    if (selectedCategory) {
+        const catObj = allCategories.find(c => c.name === selectedCategory);
+        selectedRate = catObj ? Number(catObj.rate) : 0;
+    }
+
     filtered.forEach(e => {
-        let categoriesToShow = category.value ? [category.value] : (Array.isArray(e.categories) ? e.categories : []);
+        let categoriesToShow = selectedCategory ? [selectedCategory] : (Array.isArray(e.categories) ? e.categories : []);
         if (Array.isArray(e.paid_categories)) {
             paid += categoriesToShow.filter(cat => e.paid_categories.includes(cat)).length;
-            pending += categoriesToShow.filter(cat => !e.paid_categories.includes(cat)).length;
+            let pendingCats = categoriesToShow.filter(cat => !e.paid_categories.includes(cat));
+            pending += pendingCats.length;
+            // Calculate pending amount for selected category only
+            if (selectedCategory) {
+                pendingAmount += pendingCats.length * selectedRate;
+            }
         } else {
             paid += 0;
             pending += categoriesToShow.length;
+            if (selectedCategory) {
+                pendingAmount += categoriesToShow.length * selectedRate;
+            }
         }
     });
-    paidPendingStats.textContent = `Paid: ${paid} | Pending: ${pending}`;
+
+    if (selectedCategory) {
+        paidPendingStats.textContent = `Paid: ${paid} | Pending Qty: ${pending} | Pending Amount: ${pendingAmount}`;
+    } else {
+        paidPendingStats.textContent = `Paid: ${paid} | Pending Qty: ${pending}`;
+    }
 }
 
 // Bulk mark as paid handler
