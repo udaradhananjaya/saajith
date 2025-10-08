@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Expenses Tracking App - Created by UD</title>
-  <script type="module" crossorigin src="./assets/index-t8RLg17U.js"></script>
+  <script type="module" crossorigin src="./assets/index-F77yIBhw.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/tom-select.complete-Ddof_xjP.js">
   <link rel="stylesheet" crossorigin href="./assets/tom-select-CQng-0l1.css">
 </head>
@@ -13,32 +13,16 @@
     <h1 class="mb-4">Add Entries</h1>
 
     <form id="entryForm" class="row g-3 mb-3">
-      <div class="col-md-12">
-        <input id="title" class="form-control" placeholder="Title" required />
+      <div class="col-12">
+        <label for="title" class="form-label">Title</label>
+        <input id="title" type="text" class="form-control" placeholder="Title" maxlength="6" required />
       </div>
-      <div class="col-md-12 mt-0">
-        <select id="category" multiple placeholder="Category">
-          <option value="Admin" selected>Admin</option>
-          <option value="CPU" selected>CPU</option>
-          <option value="Gates" selected>Gates</option>
-          <option value="I" selected>I</option>
-          <option value="Marine" selected>Marine</option>
-          <option value="Megaport" selected>Megaport</option>
-          <option value="Mobile" selected>Mobile</option>
-          <option value="O" selected>O</option>
-          <option value="P" selected>P</option>
-          <option value="PCU" selected>PCU</option>
-          <option value="PEU" selected>PEU</option>
-          <option value="RTF HO" selected>RTF HO</option>
-          <option value="RTF HO ASC" selected>RTF HO ASC</option>
-          <option value="RTF MO" selected>RTF MO</option>
-          <option value="RTF UPB" selected>RTF UPB</option>
-          <option value="Sales" selected>Sales</option>
-          <option value="VRIU" selected>VRIU</option>
-        </select>
+      <div class="col-12">
+        <label for="category" class="form-label">Category</label>
+        <select id="category" class="form-select" multiple></select>
       </div>
-      <div class="col-md-12 d-flex flex-column justify-content-between">
-        <button class="btn btn-primary w-100 h-100" type="submit" style="min-height: 100px;">Add</button>
+      <div class="col-12">
+        <button class="btn btn-primary w-100 py-3" type="submit">Add</button>
       </div>
     </form>
 
